@@ -1,0 +1,612 @@
+Краткая информация о базе данных "Компьютерная фирма":
+Схема БД состоит из четырех таблиц:
+Product(maker, model, type)
+PC(code, model, speed, ram, hd, cd, price)
+Laptop(code, model, speed, ram, hd, price, screen)
+Printer(code, model, color, type, price)
+Таблица Product представляет производителя (maker), номер модели (model) и тип ('PC' - ПК, 'Laptop' - ПК-блокнот или 'Printer' - принтер). Предполагается, что номера моделей в таблице Product уникальны для всех производителей и типов продуктов. В таблице PC для каждого ПК, однозначно определяемого уникальным кодом – code, указаны модель – model (внешний ключ к таблице Product), скорость - speed (процессора в мегагерцах), объем памяти - ram (в мегабайтах), размер диска - hd (в гигабайтах), скорость считывающего устройства - cd (например, '4x') и цена - price. Таблица Laptop аналогична таблице РС за исключением того, что вместо скорости CD содержит размер экрана -screen (в дюймах). В таблице Printer для каждой модели принтера указывается, является ли он цветным - color ('y', если цветной), тип принтера - type (лазерный – 'Laser', струйный – 'Jet' или матричный – 'Matrix') и цена - price.
+
+
+Краткая информация о базе данных "Корабли":
+Рассматривается БД кораблей, участвовавших во второй мировой войне. Имеются следующие отношения:
+Classes (class, type, country, numGuns, bore, displacement)
+Ships (name, class, launched)
+Battles (name, date)
+Outcomes (ship, battle, result)
+Корабли в «классах» построены по одному и тому же проекту, и классу присваивается либо имя первого корабля, построенного по данному проекту, либо названию класса дается имя проекта, которое не совпадает ни с одним из кораблей в БД. Корабль, давший название классу, называется головным.
+Отношение Classes содержит имя класса, тип (bb для боевого (линейного) корабля или bc для боевого крейсера), страну, в которой построен корабль, число главных орудий, калибр орудий (диаметр ствола орудия в дюймах) и водоизмещение ( вес в тоннах). В отношении Ships записаны название корабля, имя его класса и год спуска на воду. В отношение Battles включены название и дата битвы, в которой участвовали корабли, а в отношении Outcomes – результат участия данного корабля в битве (потоплен-sunk, поврежден - damaged или невредим - OK).
+Замечания. 1) В отношение Outcomes могут входить корабли, отсутствующие в отношении Ships. 2) Потопленный корабль в последующих битвах участия не принимает.
+
+
+Краткая информация о базе данных "Фирма вторсырья":
+Фирма имеет несколько пунктов приема вторсырья. Каждый пункт получает деньги для их выдачи сдатчикам вторсырья. Сведения о получении денег на пунктах приема записываются в таблицу:
+Income_o(point, date, inc)
+Первичным ключом является (point, date). При этом в столбец date записывается только дата (без времени), т.е. прием денег (inc) на каждом пункте производится не чаще одного раза в день. Сведения о выдаче денег сдатчикам вторсырья записываются в таблицу:
+Outcome_o(point, date, out)
+В этой таблице также первичный ключ (point, date) гарантирует отчетность каждого пункта о выданных деньгах (out) не чаще одного раза в день.
+В случае, когда приход и расход денег может фиксироваться несколько раз в день, используется другая схема с таблицами, имеющими первичный ключ code:
+Income(code, point, date, inc)
+Outcome(code, point, date, out)
+Здесь также значения столбца date не содержат времени.
+
+Задание: 1 
+Найдите номер модели, скорость и размер жесткого диска для всех ПК стоимостью менее 500 дол. Вывести: model, speed и hd
+
+SELECT model, speed, hd FROM PC WHERE price < 500
+
+Задание: 2 
+Найдите производителей принтеров. Вывести: maker
+
+SELECT DISTINCT maker FROM Product WHERE type = 'Printer'
+
+Задание: 3 
+Найдите номер модели, объем памяти и размеры экранов ПК-блокнотов, цена которых превышает 1000 дол.
+
+SELECT model, ram, screen FROM Laptop WHERE price > 1000
+
+Задание: 4 
+Найдите все записи таблицы Printer для цветных принтеров.
+
+SELECT * FROM Printer WHERE Color = 'y'
+
+Задание: 5 
+Найдите номер модели, скорость и размер жесткого диска ПК, имеющих 12x или 24x CD и цену менее 600 дол.
+
+SELECT model, speed, hd FROM PC
+WHERE Price < 600 AND cd IN ('12x','24x')
+
+Задание: 6 
+Для каждого производителя, выпускающего ПК-блокноты c объёмом жесткого диска не менее 10 Гбайт, найти скорости таких ПК-блокнотов. Вывод: производитель, скорость.
+
+SELECT DISTINCT maker, speed
+FROM Product LEFT JOIN Laptop
+ON Product.model = Laptop.model WHERE hd >= 10
+
+Задание: 7 
+Найдите номера моделей и цены всех имеющихся в продаже продуктов (любого типа) производителя B (латинская буква).
+
+SELECT Product.model, price
+FROM Product JOIN PC
+ON Product.model = PC.model WHERE maker = 'B'
+UNION
+SELECT Product.model, price
+FROM Product JOIN Laptop
+ON Product.model = Laptop.model WHERE maker = 'B'
+UNION
+SELECT Product.model, price
+FROM Product JOIN Printer
+ON Product.model = Printer.model WHERE maker = 'B'
+
+Задание: 8 
+Найдите производителя, выпускающего ПК, но не ПК-блокноты.
+
+SELECT maker FROM Product WHERE type = 'PC'
+EXCEPT
+SELECT maker FROM Product WHERE type = 'Laptop'
+
+Задание: 9 
+Найдите производителей ПК с процессором не менее 450 Мгц. Вывести: Maker
+
+SELECT DISTINCT Product.maker FROM
+Product JOIN PC
+ON Product.model = PC.model WHERE speed >= 450
+
+Задание: 10 
+Найдите модели принтеров, имеющих самую высокую цену. Вывести: model, price
+
+SELECT model, price FROM Printer
+WHERE price = (SELECT MAX(price) FROM printer)
+
+Задание: 11 
+Найдите среднюю скорость ПК.
+
+SELECT AVG(speed) AS avg_speed FROM pc
+
+Задание: 12 
+Найдите среднюю скорость ПК-блокнотов, цена которых превышает 1000 дол.
+
+SELECT AVG(Speed) AS avg_speed FROM Laptop WHERE Price > 1000
+
+Задание: 13 
+Найдите среднюю скорость ПК, выпущенных производителем A.
+
+SELECT AVG(Speed) AS avg_speed FROM 
+Product JOIN PC
+ON Product.Model = PC.model WHERE maker = 'A'
+
+Задание: 14 
+Найдите класс, имя и страну для кораблей из таблицы Ships, имеющих не менее 10 орудий.
+
+SELECT Classes.class, name, country FROM 
+Classes JOIN Ships
+ON Classes.class = Ships.class WHERE numGuns >= 10
+
+Задание: 15 
+Найдите размеры жестких дисков, совпадающих у двух и более PC. Вывести: HD
+
+SELECT hd FROM PC
+GROUP BY hd HAVING COUNT(model) >= 2
+
+Задание: 16 
+Найдите пары моделей PC, имеющих одинаковые скорость и RAM. В результате каждая пара указывается только один раз, т.е. (i,j), но не (j,i), Порядок вывода: модель с большим номером, модель с меньшим номером, скорость и RAM.
+
+SELECT DISTINCT a.model, b.model, a.speed, a.ram FROM
+pc AS a JOIN pc AS b
+ON a.speed = b.speed AND a.ram = b.ram
+WHERE a.model <> b.model AND a.model > b.model
+
+Задание: 17 
+Найдите модели ПК-блокнотов, скорость которых меньше скорости каждого из ПК.
+Вывести: type, model, speed
+
+SELECT DISTINCT product.type, laptop.model, laptop.speed
+FROM laptop JOIN product
+ON product.model = laptop.model
+WHERE laptop.speed < ALL (SELECT pc.speed FROM pc)
+
+Задание: 18 
+Найдите производителей самых дешевых цветных принтеров. Вывести: maker, price
+
+WITH
+a as (SELECT model, price, color FROM printer WHERE price IS NOT NULL AND color = 'y'),
+c as (SELECT * FROM a WHERE price = (SELECT MIN(price) FROM a))
+
+SELECT DISTINCT product.maker, c.price FROM 
+product JOIN c 
+ON product.model = c.model
+
+Задание: 19 
+Для каждого производителя, имеющего модели в таблице Laptop, найдите средний размер экрана выпускаемых им ПК-блокнотов.
+Вывести: maker, средний размер экрана.
+
+SELECT maker, AVG(screen) FROM
+Product JOIN Laptop
+ON Product.model = Laptop.model GROUP BY maker
+
+Задание: 20 
+Найдите производителей, выпускающих по меньшей мере три различных модели ПК. Вывести: Maker, число моделей ПК.
+
+SELECT maker, COUNT(type) AS count_model FROM Product
+WHERE type = 'PC'
+GROUP BY maker HAVING COUNT(type) >= 3
+
+Задание: 21 
+Найдите максимальную цену ПК, выпускаемых каждым производителем, у которого есть модели в таблице PC.
+Вывести: maker, максимальная цена.
+
+SELECT maker, MAX(price) FROM
+product JOIN PC
+ON product.model = pc.model GROUP BY maker
+
+Задание: 22 
+Для каждого значения скорости ПК, превышающего 600 МГц, определите среднюю цену ПК с такой же скоростью. Вывести: speed, средняя цена.
+
+SELECT speed, AVG(price) AS avg_price FROM pc
+GROUP BY speed HAVING speed > 600
+
+Задание: 23 
+Найдите производителей, которые производили бы как ПК
+со скоростью не менее 750 МГц, так и ПК-блокноты со скоростью не менее 750 МГц.
+Вывести: Maker
+
+SELECT maker FROM 
+product JOIN (SELECT model FROM laptop WHERE speed >= 750) AS a
+ON product.model = a.model GROUP BY maker
+INTERSECT
+SELECT maker FROM 
+product JOIN (SELECT model FROM pc WHERE speed >= 750) AS a
+ON product.model = a.model GROUP BY maker
+
+Задание: 24 
+Перечислите номера моделей любых типов, имеющих самую высокую цену по всей имеющейся в базе данных продукции.
+
+WITH 
+tab_all AS (SELECT model, price FROM pc
+UNION
+SELECT model, price FROM laptop
+UNION
+SELECT model, price FROM printer)
+
+SELECT model FROM tab_all
+WHERE price IN (SELECT MAX(price) FROM tab_all)
+
+Задание: 25 
+Найдите производителей принтеров, которые производят ПК с наименьшим объемом RAM и с самым быстрым процессором среди всех ПК, имеющих наименьший объем RAM. Вывести: Maker
+
+WITH 
+min_ram AS (SELECT * FROM pc WHERE ram IN (SELECT MIN(ram) FROM pc)),
+b AS (SELECT * FROM min_ram WHERE speed IN (SELECT MAX(speed) FROM min_ram)),
+c AS (SELECT * FROM product WHERE type = 'printer'),
+d AS (SELECT maker FROM product JOIN b ON product.model = b.model)
+
+SELECT DISTINCT c.maker FROM c JOIN d ON c.maker = d.maker
+
+Задание: 26 
+Найдите среднюю цену ПК и ПК-блокнотов, выпущенных производителем A (латинская буква). Вывести: одна общая средняя цена.
+
+WITH 
+a AS (SELECT price FROM pc JOIN product ON pc.model = product.model WHERE maker = 'A' AND price IS NOT NULL
+UNION ALL
+SELECT price FROM laptop JOIN product ON laptop.model = product.model WHERE maker = 'A' AND price IS NOT NULL)
+
+SELECT AVG(price) AS AVG_price FROM a
+
+Задание: 27 
+Найдите средний размер диска ПК каждого из тех производителей, которые выпускают и принтеры. Вывести: maker, средний размер HD.
+
+SELECT maker, AVG(hd) FROM pc JOIN product ON pc.model = product.model
+WHERE maker IN (
+SELECT DISTINCT maker FROM product WHERE type = 'Printer' 
+INTERSECT
+SELECT DISTINCT maker FROM product WHERE type = 'PC'
+)
+GROUP BY maker
+
+Задание: 28 
+Используя таблицу Product, определить количество производителей, выпускающих по одной модели.
+
+SELECT COUNT(qty) AS cnt FROM 
+(SELECT COUNT(maker) as qty, maker FROM product GROUP BY maker) AS d
+WHERE qty = 1
+
+Задание: 29 
+В предположении, что приход и расход денег на каждом пункте приема фиксируется не чаще одного раза в день [т.е. первичный ключ (пункт, дата)], написать запрос с выходными данными (пункт, дата, приход, расход). Использовать таблицы Income_o и Outcome_o.
+
+SELECT a.point, a.date, inc, out FROM 
+income_o AS a LEFT JOIN outcome_o AS b ON a.point = b.point
+AND a.date = b.date
+UNION
+SELECT b.point, b.date, inc, out FROM 
+income_o AS a RIGHT JOIN outcome_o AS b ON a.point = b.point
+AND a.date = b.date
+
+Задание: 30 
+В предположении, что приход и расход денег на каждом пункте приема фиксируется произвольное число раз (первичным ключом в таблицах является столбец code), требуется получить таблицу, в которой каждому пункту за каждую дату выполнения операций будет соответствовать одна строка.
+Вывод: point, date, суммарный расход пункта за день (out), суммарный приход пункта за день (inc). Отсутствующие значения считать неопределенными (NULL).
+
+WITH
+a AS (SELECT point, date, SUM(inc) AS Inc FROM Income GROUP BY date, point),
+b AS (SELECT point, date, SUM(out) AS Out FROM Outcome GROUP BY date, point)
+
+SELECT a.point, a.date, SUM(out) AS Out, SUM(inc) AS Inc FROM 
+a LEFT JOIN b ON a.point = b.point AND a.date = b.date
+GROUP BY a.date, a.point
+UNION
+SELECT b.point, b.date, SUM(out) AS Out, SUM(inc) AS Inc FROM 
+a RIGHT JOIN b ON a.point = b.point AND a.date = b.date
+GROUP BY b.date, b.point
+
+Задание: 31 
+Для классов кораблей, калибр орудий которых не менее 16 дюймов, укажите класс и страну.
+
+SELECT class, country FROM classes WHERE bore >= 16
+
+Задание: 32 
+Одной из характеристик корабля является половина куба калибра его главных орудий (mw). С точностью до 2 десятичных знаков определите среднее значение mw для кораблей каждой страны, у которой есть корабли в базе данных.
+
+WITH
+sh AS (
+SELECT c.country, c.class, c.bore FROM 
+classes AS c JOIN (SELECT * FROM ships WHERE name <> class) AS s
+ON c.class = s.class),
+
+tab AS (
+SELECT country, class, bore FROM sh
+UNION ALL
+SELECT country, class, bore FROM classes
+WHERE class IN (SELECT ship FROM outcomes) OR class IN (SELECT name FROM ships)),
+
+main AS (
+SELECT country, class, bore, POWER(bore, 3)/2 AS weight 
+FROM tab)
+
+SELECT country, CAST((AVG(weight)) AS DECIMAL(16,2)) AS weight FROM main
+GROUP BY country
+
+Задание: 33 
+Укажите корабли, потопленные в сражениях в Северной Атлантике (North Atlantic). Вывод: ship.
+
+SELECT ship FROM outcomes WHERE result = 'sunk' AND battle = 'North Atlantic'
+
+Задание: 34 
+По Вашингтонскому международному договору от начала 1922 г. запрещалось строить линейные корабли водоизмещением более 35 тыс.тонн. Укажите корабли, нарушившие этот договор (учитывать только корабли c известным годом спуска на воду). Вывести названия кораблей.
+
+SELECT name FROM ships
+WHERE Launched >= 1922 AND class IN 
+(SELECT class FROM classes WHERE type = 'bb' AND displacement > 35000)
+
+Задание: 35 
+В таблице Product найти модели, которые состоят только из цифр или только из латинских букв (A-Z, без учета регистра).
+Вывод: номер модели, тип модели.
+
+SELECT model, type FROM product
+WHERE model NOT LIKE '%[^0-9]%' OR model NOT LIKE '%[^A-Z]%'
+
+Задание: 36 
+Перечислите названия головных кораблей, имеющихся в базе данных (учесть корабли в Outcomes).
+
+SELECT class FROM classes
+WHERE class IN (SELECT ship FROM outcomes) OR class IN (SELECT name FROM ships)
+
+Задание: 37 
+Найдите классы, в которые входит только один корабль из базы данных (учесть также корабли в Outcomes).
+
+WITH
+sh AS (
+SELECT c.country, c.class, c.bore FROM 
+classes AS c JOIN (SELECT * FROM ships WHERE name <> class) AS s
+ON c.class = s.class),
+
+tab AS (
+SELECT country, class, bore FROM sh
+UNION ALL
+SELECT country, class, bore FROM classes
+WHERE class IN (SELECT ship FROM outcomes) OR class IN (SELECT name FROM ships))
+
+SELECT class FROM tab GROUP BY class HAVING COUNT(class) = 1
+
+Задание: 38 
+Найдите страны, имевшие когда-либо классы обычных боевых кораблей ('bb') и имевшие когда-либо классы крейсеров ('bc').
+
+WITH
+a AS (SELECT country, type FROM classes WHERE type = 'bb'),
+b AS (SELECT country, type FROM classes WHERE type = 'bc')
+
+SELECT country FROM a
+INTERSECT
+SELECT country FROM b
+
+Задание: 39 
+Найдите корабли, `сохранившиеся для будущих сражений`; т.е. выведенные из строя в одной битве (damaged), они участвовали в другой, произошедшей позже.
+
+WITH
+a AS (
+SELECT ship, battle, result, date FROM 
+outcomes JOIN battles
+ON outcomes.battle = battles.name WHERE result = 'damaged'),
+
+dam AS (SELECT ship, MIN(date) AS date FROM a GROUP BY ship),
+
+b AS (
+SELECT ship, battle, result, date FROM 
+outcomes JOIN battles
+ON outcomes.battle = battles.name),
+
+ok AS (SELECT ship, MAX(date) AS date FROM b GROUP BY ship)
+
+SELECT ok.ship FROM
+dam JOIN ok
+ON dam.ship = ok.ship WHERE ok.date > dam.date
+
+Задание: 40 
+Найти производителей, которые выпускают более одной модели, при этом все выпускаемые производителем модели являются продуктами одного типа.
+Вывести: maker, type
+
+WITH
+a AS (
+SELECT maker, COUNT(model) AS c_m FROM product 
+GROUP BY maker HAVING COUNT(model) > 1),
+
+b AS (
+SELECT DISTINCT(a.maker), c_t, type FROM
+product JOIN (SELECT maker, COUNT(type) AS c_t FROM product
+GROUP BY maker HAVING COUNT(DISTINCT type) = 1) AS a
+ON product.maker = a.maker)
+
+SELECT a.maker, type FROM a JOIN b ON a.maker = b.maker
+
+Задание: 41 
+Для каждого производителя, у которого присутствуют модели хотя бы в одной из таблиц PC, Laptop или Printer,
+определить максимальную цену на его продукцию.
+Вывод: имя производителя, если среди цен на продукцию данного производителя присутствует NULL, то выводить для этого производителя NULL,
+иначе максимальную цену.
+
+WITH
+total AS (
+SELECT maker, tab.price AS price FROM product JOIN (
+SELECT model, price FROM pc
+UNION ALL
+SELECT model, price FROM laptop
+UNION ALL
+SELECT model, price FROM printer) AS tab
+ON product.model = tab.model),
+
+a AS (SELECT maker, MAX(price) AS ma FROM total GROUP BY maker)
+
+SELECT maker, 
+CASE 
+WHEN maker IN (SELECT maker FROM total WHERE price IS NULL)
+THEN NULL
+ELSE ma
+END AS m_price
+FROM a
+
+Задание: 42 
+Найдите названия кораблей, потопленных в сражениях, и название сражения, в котором они были потоплены.
+
+SELECT ship, battle FROM outcomes WHERE result = 'sunk'
+
+Задание: 43 
+Укажите сражения, которые произошли в годы, не совпадающие ни с одним из годов спуска кораблей на воду.
+
+SELECT battles.name FROM 
+battles LEFT JOIN ships
+ON YEAR(battles.date) = ships.launched
+WHERE ships.launched IS NULL
+
+Задание: 44 
+Найдите названия всех кораблей в базе данных, начинающихся с буквы R.
+
+SELECT name FROM ships WHERE name LIKE 'R%'
+UNION
+SELECT ship FROM outcomes WHERE ship LIKE 'R%'
+
+Задание: 45 
+Найдите названия всех кораблей в базе данных, состоящие из трех и более слов (например, King George V).
+Считать, что слова в названиях разделяются единичными пробелами, и нет концевых пробелов.
+
+SELECT name FROM ships WHERE name LIKE '% % %'
+UNION
+SELECT ship FROM outcomes WHERE ship LIKE '% % %'
+
+Задание: 46 
+Для каждого корабля, участвовавшего в сражении при Гвадалканале (Guadalcanal), вывести название, водоизмещение и число орудий.
+
+WITH 
+outc AS (
+SELECT * FROM outcomes WHERE battle = 'Guadalcanal'),
+
+tab AS (
+SELECT name, displacement, numGuns FROM
+classes JOIN ships
+ON classes.class = ships.class
+UNION
+SELECT class, displacement, numGuns FROM classes)
+
+SELECT ship, displacement, numGuns FROM
+outc LEFT JOIN tab
+ON outc.ship = tab.name
+
+Задание: 47 
+Определить страны, которые потеряли в сражениях все свои корабли.
+
+WITH
+tab AS (
+SELECT c.country, s.name FROM classes AS c JOIN ships AS s ON c.class=s.class
+UNION
+SELECT c.country, o.ship FROM outcomes AS o JOIN classes AS c ON c.class=o.ship),
+
+lost AS (
+SELECT country, COUNT(*) AS cnt FROM tab LEFT JOIN outcomes AS o
+ON tab.name = o.ship WHERE result = 'sunk' GROUP BY country),
+
+cou AS (SELECT country, COUNT(*) AS cnt FROM tab GROUP BY country)
+
+SELECT cou.country FROM
+lost JOIN cou ON lost.country = cou.country
+WHERE lost.cnt = cou.cnt
+
+Задание: 48 (Serge I: 2003-02-16)
+Найдите классы кораблей, в которых хотя бы один корабль был потоплен в сражении.
+
+WITH
+tab AS (
+SELECT c.class, s.name FROM classes AS c JOIN ships AS s ON c.class=s.class
+UNION
+SELECT c.class, o.ship FROM outcomes AS o JOIN classes AS c ON c.class=o.ship),
+
+sun AS (
+SELECT ship FROM outcomes WHERE result = 'sunk')
+
+SELECT DISTINCT(tab.class) FROM tab JOIN sun ON tab.name = sun.ship
+
+Задание: 49 
+Найдите названия кораблей с орудиями калибра 16 дюймов (учесть корабли из таблицы Outcomes).
+
+WITH
+tab AS (
+SELECT c.bore, s.name FROM classes AS c JOIN ships AS s ON c.class=s.class
+UNION
+SELECT c.bore, o.ship FROM outcomes AS o JOIN classes AS c ON c.class=o.ship)
+
+SELECT name FROM tab WHERE bore = 16
+
+Задание: 50 
+Найдите сражения, в которых участвовали корабли класса Kongo из таблицы Ships.
+
+SELECT DISTINCT(battle) FROM 
+(SELECT * FROM ships WHERE class = 'Kongo') AS tab JOIN outcomes AS o
+ON tab.name = o.ship
+
+Задание: 51 
+Найдите названия кораблей, имеющих наибольшее число орудий среди всех имеющихся кораблей такого же водоизмещения (учесть корабли из таблицы Outcomes).
+
+WITH
+tab AS (
+SELECT c.numGuns, c.displacement, s.name FROM classes AS c JOIN ships AS s ON c.class=s.class
+UNION
+SELECT c.numGuns, c.displacement, o.ship FROM outcomes AS o JOIN classes AS c ON c.class=o.ship),
+
+mxg AS (SELECT displacement, MAX(numGuns) AS mx FROM tab GROUP BY displacement)
+
+SELECT name FROM tab JOIN mxg 
+ON tab.displacement = mxg.displacement AND tab.numGuns = mxg.mx
+
+Задание: 52 
+Определить названия всех кораблей из таблицы Ships, которые могут быть линейным японским кораблем,
+имеющим число главных орудий не менее девяти, калибр орудий менее 19 дюймов и водоизмещение не более 65 тыс.тонн
+
+SELECT name FROM ships AS s JOIN classes AS c
+ON s.class = c.class
+WHERE
+type = 'bb' AND
+country = 'Japan' AND
+(numGuns >= 9 OR numGuns IS NULL) AND
+(bore < 19 OR bore IS NULL) AND
+(displacement <= 65000 OR displacement IS NULL)
+
+Задание: 53 
+Определите среднее число орудий для классов линейных кораблей.
+Получить результат с точностью до 2-х десятичных знаков.
+
+SELECT CAST(AVG(Avg_numGuns) AS DECIMAL(12,2)) AS Avg_numGuns FROM 
+(SELECT CAST(numGuns AS DECIMAL(12,2)) AS Avg_numGuns, type FROM classes WHERE type = 'bb') AS a
+
+Задание: 54 
+С точностью до 2-х десятичных знаков определите среднее число орудий всех линейных кораблей (учесть корабли из таблицы Outcomes).
+
+WITH
+tab AS (
+SELECT s.name, CAST(c.numGuns AS DECIMAL(12,2)) AS ng, c.type FROM ships AS s JOIN classes AS c
+ON s.class = c.class
+UNION
+SELECT o.ship, CAST(c.numGuns AS DECIMAL(12,2)) AS ng, c.type FROM outcomes AS o JOIN classes AS c
+ON o.ship = c.class)
+
+SELECT CAST(AVG(ng) AS DECIMAL(12,2)) AS Avg_numG FROM tab WHERE type = 'bb'
+
+Задание: 55 
+Для каждого класса определите год, когда был спущен на воду первый корабль этого класса. Если год спуска на воду головного корабля неизвестен, определите минимальный год спуска на воду кораблей этого класса. Вывести: класс, год.
+
+WITH
+a AS (
+SELECT c.class, s.launched FROM classes AS c LEFT JOIN ships AS s
+ON c.class = s.class)
+
+SELECT a.class, MIN(launched) FROM a GROUP BY class
+
+Задание: 56 
+Для каждого класса определите число кораблей этого класса, потопленных в сражениях. Вывести: класс и число потопленных кораблей.
+
+WITH
+tab AS (
+SELECT s.name, c.class FROM ships AS s LEFT JOIN classes AS c
+ON s.class = c.class
+UNION
+SELECT o.ship, c.class FROM outcomes AS o RIGHT JOIN classes AS c
+ON o.ship = c.class)
+
+SELECT tab.class, COUNT(o.result) FROM tab LEFT JOIN 
+(SELECT o.ship, o.result FROM outcomes AS o WHERE result = 'sunk') AS o
+ON tab.name = o.ship
+GROUP BY tab.class
+
+Задание: 57 
+Для классов, имеющих потери в виде потопленных кораблей и не менее 3 кораблей в базе данных, вывести имя класса и число потопленных кораблей.
+
+WITH
+tab AS (
+SELECT s.name, c.class FROM ships AS s LEFT JOIN classes AS c
+ON s.class = c.class
+UNION
+SELECT o.ship, c.class FROM outcomes AS o RIGHT JOIN classes AS c
+ON o.ship = c.class),
+
+a AS (
+SELECT class, count(name) AS cnt FROM tab GROUP BY class HAVING COUNT(name) >= 3)
+
+SELECT tab.class, COUNT(result) FROM tab JOIN
+(SELECT ship, result FROM outcomes WHERE result = 'sunk') AS o
+ON o.ship = tab.name
+GROUP BY tab.class
+HAVING tab.class IN (SELECT class FROM a)
