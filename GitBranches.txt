@@ -1,0 +1,95 @@
+Home work for GitHub )
+1. На локальном репозитории сделать ветки для:
+- Postman
+- Jmeter
+- CheckLists
+- Bag Reports
+- SQL
+- Charles
+- Mobile testing
+(
+git branch Postman
+git branch Jmeter
+git branch CheckLists
+git branch BugReports
+git branch SQL
+git branch Charles
+git branch MobileTesting
+)
+
+2. Запушить все ветки на внешний репозиторий
+(
+git push -u origin Postman Jmeter CheckLists BugReports SQL Charles MobileTesting
+)
+
+3. В ветке Bag Reports сделать текстовый документ со структурой баг репорта
+(
+git switch BugReports
+
+echo "ID
+Title
+Environment
+Buld
+Preconditions
+StepsToReproduce
+ActualResult
+ExpectedResult
+Attachments
+Severity
+Priority
+AssignedTo
+Status
+Author" >> BugReportTemplate.txt
+)
+
+4. Запушить структуру багрепорта на внешний репозиторий
+(
+git add BugReportTemplate.txt
+git commit -m "Add BugReportTemplate file"
+git push
+)
+
+5. Вмержить ветку Bag Reports в Main
+(
+git switch -
+git merge BugReports
+)
+
+6. Запушить main на внешний репозиторий.
+(
+git push
+)
+
+7. В ветке CheckLists набросать структуру чек листа.
+(
+git switch CheckLists
+
+echo "There should be 3 columns: ID, Title, Status. I wrote some of the positive TitleExamples down below.
+User will be able to login with a valid username and valid password
+Verify the "Remember me" functionality
+The data in password field is either visible as asterisk or bullet signs
+The data in password cannot be copied with CTRL+C combination
+The data in password cannot be copied with CTRL+INS combination
+The data in password cannot be copied with "Copy" on right-click mouse button
+The "Enter" key of the keyboard is pushing "Login" button by default
+" >> CheckListTemplateLogin.txt
+)
+
+8. Запушить структуру на внешний репозиторий
+(
+git add CheckListTemplateLogin.txt
+git commit -m "Add CheckListTemplateLogin file"
+git push
+)
+
+9. На внешнем репозитории сделать Pull Request ветки CheckLists в main
+(
+Leave comment and push the green "Compare & pull reqest" button
+Push the green "Merge pull reqest" button in "Pull reqests" tab
+)
+
+10. Синхронизировать Внешнюю и Локальную ветки Main
+(
+git switch -
+git pull
+)
