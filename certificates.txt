@@ -1,0 +1,6 @@
+Sertificates:
+ - Awesome course, i highly recommend it: Stepik, Interactive SQL Simulator, 100% done. 
+	https://stepik.org/cert/1066363
+	
+ - SQL - Sololearn 
+	https://www.sololearn.com/certificates/course/en/22710300/1060/landscape/png
